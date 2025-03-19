@@ -1,0 +1,38 @@
+services:
+  lobaro-platform:
+    image: 072286380570.dkr.ecr.eu-central-1.amazonaws.com/lobaro-backend:${RELEASE?}
+    restart: always
+    volumes:
+      # You need to put a application.toml to ./lobaro-backend/config/application.toml
+      # Default can even be empty, important values are set as ENV below
+      # See: https://platform.lobaro.com/docs/administration/server-configuration
+      - ./lobaro-platform/config:/server/config
+
+      # Place your license.json into ./lobaro-platform/data/license/license.json
+      - ./lobaro-platform/data:/server/data
+    environment:
+      - SERVER__DEVMODE=false
+      - SERVER__BIND=:8000
+      - SERVER__FRONTENDURL=${FRONTEND_URL?}
+      - SERVER__APITOKENSECRET=${API_TOKEN_SECRET?}
+      - SERVER__OAUTHTOKENSECRET=${OAUTH_TOKEN_SECRET?}
+      - SERVER__OAUTHREFRESHTOKENSECRET=${OAUTH_REFRESH_TOKEN_SECRET?}
+      - DATABASE__HOST=database
+      - DATABASE__PASSWORD=${DATABASE_PASSWORD?}
+      - CONFIG=/server/config/application.yml
+    ports:
+      - 5683:5683/udp # coap
+      - 5684:5684/udp # coaps
+      - 1883:1883/tcp # mqtt
+      - 8883:8883/tcp # mqtts
+      - 8000:8000/tcp # http
+    depends_on:
+      - database
+
+  database:
+    image: timescale/timescaledb:${TIMESCALEDB_RELEASE?}
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD?}
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
