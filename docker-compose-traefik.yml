@@ -22,7 +22,7 @@ services:
       - SERVER__OAUTHREFRESHTOKENSECRET=${OAUTH_REFRESH_TOKEN_SECRET?}
       - DATABASE__HOST=database
       - DATABASE__PASSWORD=${DATABASE_PASSWORD?}
-      - CONFIG=/server/config/application.yml
+      - CONFIG=/server/config/application.toml
     labels:
       - traefik.enable="true"
       - traefik.http.services.lob-platform.loadbalancer.server.port="8000"
